@@ -116,6 +116,30 @@ The agent explicitly treated `main_intent` as a provisional, unverified label ra
 
 ### Status
 PASS — the agent demonstrated appropriate uncertainty handling and privacy-aware intent reasoning.
+## Evaluation Test #3 — Semantic Clustering
+
+### Result
+PASS
+
+### Test
+The agent was asked to determine whether the uploaded dataset could support genuine semantic/topic clustering.
+
+### What Worked
+The agent correctly:
+- checked whether semantic information was available
+- identified that the dataset contains no query/keyword text, page titles, headings, body content, topic labels, or embeddings
+- refused to create semantic clusters from performance metrics
+- explained why `content_type` and `main_intent` are not sufficient for genuine topic clustering
+- distinguished semantic clustering from categorical segmentation
+- identified the additional authorized data required for genuine clustering
+- explained how clustering could later be performed using legitimate semantic inputs
+- avoided inventing topics, clusters, underserved areas, or cannibalization risks
+
+### Evidence Discipline
+The agent explicitly stated that clustering performance metrics or coarse categories would misrepresent the results as semantic clusters.
+
+### Status
+PASS — the agent correctly recognized when semantic clustering was not supported by the available data and provided a safe next step.
 
 ## Evaluation Test #4 — GSC + GA4 Reasoning
 
