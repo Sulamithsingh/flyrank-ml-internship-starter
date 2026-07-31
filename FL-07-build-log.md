@@ -116,3 +116,86 @@ The agent explicitly treated `main_intent` as a provisional, unverified label ra
 
 ### Status
 PASS — the agent demonstrated appropriate uncertainty handling and privacy-aware intent reasoning.
+
+## Evaluation Test #4 — GSC + GA4 Reasoning
+
+### Result
+PARTIAL
+
+The agent correctly identified that query-level GSC-to-GA4 joining is not possible because no query field exists. It also recognized that the data is page/content-level.
+
+However, the dataset does not contain an explicit `landing_page_url` field or raw pre-join tables, so the agent could not independently verify whether the original GSC + GA4 join was actually performed using landing-page URL.
+
+### Status
+PARTIAL — correct reasoning and uncertainty handling, but the original join cannot be independently verified from the available dataset.
+
+## Evaluation Test #5 — Privacy Handling
+
+### Result
+PASS
+
+The agent correctly:
+- recognized that search-query information is unavailable
+- did not attempt to reconstruct or infer hidden queries
+- explained the resulting analytical limitations
+- used safe page-level aggregate analysis instead
+- did not invent example queries
+
+### Status
+PASS — privacy guardrails were followed correctly.
+
+## Evaluation Test #6 — Insight → Action
+
+### Result
+PASS
+
+The agent identified 1,561 striking-distance content pieces with recent clicks and a declining trend.
+
+It connected:
+**Data → Insight → Action**
+
+The proposed action was to prioritize this segment for content refresh. The agent clearly distinguished confirmed evidence from hypotheses and did not claim that refreshing the content would necessarily reverse the decline.
+
+It also avoided unsupported revenue, conversion, or business-impact claims.
+
+### Status
+PASS — the agent successfully completed the insight-to-action workflow.
+
+## Evaluation Test #7 — Evidence Discipline
+
+### Result
+PASS
+
+The agent provided supported conclusions and explicitly identified conclusions that could not reliably be made from the dataset.
+
+It correctly avoided unsupported causal claims and explained what evidence was missing.
+
+It also confirmed that when evidence is insufficient, it will state that rather than inventing an answer.
+
+### Status
+PASS — strong evidence discipline demonstrated.
+
+## Final Evaluation Results
+
+| Evaluation Case | Result |
+|---|---|
+| Opportunity Modeling | PASS |
+| Intent Modeling | PASS |
+| Semantic Clustering | PASS |
+| GSC + GA4 Reasoning | PARTIAL |
+| Privacy Handling | PASS |
+| Insight → Action | PASS |
+| Evidence Discipline | PASS |
+
+### Overall Result
+
+**PASS — 6/7 full passes, 1 partial.**
+
+The main remaining limitation is verification of the original GSC + GA4 join because the current dataset lacks an explicit landing-page URL field and raw pre-join tables.
+
+### Recommended Future Improvements
+
+- Add a `landing_page_url` field or document the join key used to create the dataset.
+- Document the methodology used to calculate `trend_pct` and `trend_direction`.
+- Add authorized query text where privacy rules permit if genuine query-level semantic analysis is required.
+- Add conversion/revenue fields only if future business-impact analysis is explicitly required.
