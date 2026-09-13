@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Content Refresh Signals and Action Prioritization</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.7;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 25px;
+            color: #222;
+            background: #f7f7f7;
+        }
+
+        article {
+            background: white;
+            padding: 45px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            margin-top: 40px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            margin-top: 25px;
+        }
+
+        .author {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .abstract {
+            background: #f1f1f1;
+            padding: 20px;
+            border-left: 4px solid #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        .warning {
+            background: #fff4d6;
+            padding: 18px;
+            border-left: 4px solid #d99a00;
+        }
+
+        .action {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        footer {
+            margin-top: 45px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<article>
+
+    <h1>
+        Content Refresh Signals and Action Prioritization
+    </h1>
+
+    <p class="author">
+        <strong>Author:</strong> Sulamith Singh
+    </p>
+
+    <div class="abstract">
+        <h2>Abstract</h2>
+
+        <p>
+            This project studies content-refresh signals in the FlyRank starter
+            dataset and develops a decision-support workflow for prioritizing
+            pages for human review. A Random Forest classifier was trained using
+            days since last update, impressions in the last 90 days, click-through
+            rate, and average search position. A random 80/20 split produced an
+            accuracy of 1.00, while a client-grouped 80/20 validation produced
+            an accuracy of approximately 0.99984 with no client overlap between
+            training and testing sets.
+        </p>
+
+        <p>
+            However, the validation audit found an important limitation: the
+            target label was directly constructed from the same four features
+            used by the model. Therefore, the near-perfect model performance
+            should not be interpreted as evidence of general predictive ability.
+            The final analysis focuses on honest validation, observed content
+            patterns, and a ranked action playbook rather than presenting the
+            model as a production-ready predictor.
+        </p>
+    </div>
+
+
+    <h2>1. Introduction / Problem Statement</h2>
+
+    <p>
+        Content teams need a practical way to identify pages that may deserve
+        review or monitoring. This project examines observable search-performance
+        signals such as clicks, impressions, click-through rate, ranking
+        position, content age, and trend direction.
+    </p>
+
+    <p>
+        The main goal is to turn these signals into a transparent decision-support
+        workflow. The analysis does not attempt to prove that a specific content
+        change will cause better rankings or traffic.
+    </p>
+
+    <h3>Research focus</h3>
+
+    <p>
+        The analysis asks which measurable content and search-performance signals
+        can be used to identify pages that deserve review, and how those signals
+        can be translated into a ranked and human-reviewable action queue.
+    </p>
+
+
+    <h2>2. Data</h2>
+
+    <p>
+        The analysis uses the anonymized FlyRank starter dataset. The dataset
+        contains 30,000 rows and 44 columns.
+    </p>
+
+    <p>
+        The modeling workflow uses four features:
+    </p>
+
+    <ul>
+        <li>Days since last update</li>
+        <li>Impressions in the last 90 days</li>
+        <li>Click-through rate (CTR)</li>
+        <li>Average search position</li>
+    </ul>
+
+    <p>
+        The classification target was defined using four thresholds:
+    </p>
+
+    <ul>
+        <li>days_since_last_update ≥ 90</li>
+        <li>impressions_90d ≥ 1000</li>
+        <li>CTR ≤ 0.10</li>
+        <li>average position ≤ 20</li>
+    </ul>
+
+    <div class="warning">
+        <strong>Important data limitation:</strong>
+        the target is directly constructed from the four model features.
+        This creates a target-definition problem and means the model is largely
+        learning the rule used to construct its label.
+    </div>
+
+
+    <h2>3. Methodology</h2>
+
+    <h3>3.1 Model</h3>
+
+    <p>
+        A Random Forest Classifier with 100 estimators and random state 42 was
+        used. The model was selected because it can represent nonlinear
+        relationships and provides feature-importance values.
+    </p>
+
+    <h3>3.2 Initial split</h3>
+
+    <p>
+        The initial model used an 80/20 train-test split with random state 42.
+        This produced 24,000 training rows and 6,000 test rows.
+    </p>
+
+    <h3>3.3 Honest validation</h3>
+
+    <p>
+        A client-grouped 80/20 split was then used to prevent the same client
+        from appearing in both the training and test sets.
+    </p>
+
+    <table>
+        <tr>
+            <th>Measure</th>
+            <th>Result</th>
+        </tr>
+
+        <tr>
+            <td>Random-split accuracy</td>
+            <td>1.0000</td>
+        </tr>
+
+        <tr>
+            <td>Client-grouped accuracy</td>
+            <td>0.9998377</td>
+        </tr>
+
+        <tr>
+            <td>Training rows</td>
+            <td>23,837</td>
+        </tr>
+
+        <tr>
+            <td>Test rows</td>
+            <td>6,163</td>
+        </tr>
+
+        <tr>
+            <td>Training clients</td>
+            <td>25</td>
+        </tr>
+
+        <tr>
+            <td>Testing clients</td>
+            <td>7</td>
+        </tr>
+
+        <tr>
+            <td>Client overlap</td>
+            <td>0</td>
+        </tr>
+    </table>
+
+
+    <h2>4. Results</h2>
+
+    <h3>4.1 Model result</h3>
+
+    <p>
+        The Random Forest achieved perfect accuracy on the initial random split.
+        Under the more honest client-grouped split, accuracy was 0.9998377.
+        The grouped split also confirmed that no clients appeared in both
+        training and testing sets.
+    </p>
+
+    <p>
+        These results are numerically strong but should not be interpreted as
+        evidence that the model will generalize to a real production prediction
+        problem.
+    </p>
+
+    <h3>4.2 Feature importance</h3>
+
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Importance</th>
+        </tr>
+
+        <tr>
+            <td>Average position</td>
+            <td>0.331056</td>
+        </tr>
+
+        <tr>
+            <td>CTR</td>
+            <td>0.303488</td>
+        </tr>
+
+        <tr>
+            <td>Days since last update</td>
+            <td>0.212908</td>
+        </tr>
+
+        <tr>
+            <td>Impressions in last 90 days</td>
+            <td>0.152548</td>
+        </tr>
+    </table>
+
+
+    <h3>4.3 Validation and error analysis</h3>
+
+    <p>
+        The client-grouped test contained one incorrect prediction. The model
+        predicted 0 while the actual target was 1. The example had 92 days since
+        its last update, 1,130 impressions, a CTR of 0.09, and an average
+        position of 10.0.
+    </p>
+
+    <p>
+        This was a false negative. Because the target itself is directly
+        constructed from the model features, this error does not provide enough
+        evidence to make broad claims about model weaknesses.
+    </p>
+
+
+    <div class="warning">
+
+        <h3>Leakage / target-definition finding</h3>
+
+        <p>
+            The target is directly constructed from all four features used by
+            the model. Therefore, the model is learning the rule used to create
+            the target. The near-perfect accuracy should not be treated as
+            general predictive performance.
+        </p>
+
+    </div>
+
+
+    <h2>5. Ranked Recommendations</h2>
+
+    <p>
+        The final workflow uses observed content-performance segments to create
+        a ranked action queue.
+    </p>
+
+    <div class="action">
+        <h3>Priority 1 — Striking-distance pages with declining clicks</h3>
+
+        <p>
+            <strong>1,561 pages</strong> were identified in this segment, with
+            a median trend of <strong>-44.4%</strong>.
+        </p>
+
+        <p>
+            Recommended action: prioritize human review of factual freshness,
+            content completeness, internal linking, and page/query relevance.
+        </p>
+    </div>
+
+    <div class="action">
+        <h3>Priority 2 — Impressions but no recent clicks</h3>
+
+        <p>
+            <strong>18,365 pages</strong> had impressions but zero clicks in
+            the last 30 days.
+        </p>
+
+        <p>
+            Recommended action: investigate indexing, search visibility,
+            title/snippet presentation, ranking position, and page/query
+            relevance before changing content.
+        </p>
+    </div>
+
+    <div class="action">
+        <h3>Priority 3 — Stable striking-distance pages</h3>
+
+        <p>
+            <strong>823 pages</strong> were in this segment, with a median trend
+            of <strong>-5.4%</strong>.
+        </p>
+
+        <p>
+            Recommended action: monitor clicks, impressions, CTR, and average
+            position before making major changes.
+        </p>
+    </div>
+
+    <div class="action">
+        <h3>Priority 4 — Improving striking-distance pages</h3>
+
+        <p>
+            <strong>489 pages</strong> were improving, with a median trend of
+            <strong>+54.4%</strong>.
+        </p>
+
+        <p>
+            Recommended action: avoid unnecessary changes and monitor whether
+            the improvement continues.
+        </p>
+    </div>
+
+
+    <h2>6. Limitations and Honest Framing</h2>
+
+    <ul>
+        <li>
+            The target is directly constructed from the same four features
+            used by the classifier.
+        </li>
+
+        <li>
+            The near-perfect accuracy therefore does not demonstrate general
+            predictive performance.
+        </li>
+
+        <li>
+            The analysis is observational and does not establish causation.
+        </li>
+
+        <li>
+            The dataset does not contain query text, conversion or revenue
+            data, or all technical SEO and SERP factors.
+        </li>
+
+        <li>
+            The recommendations are decision-support signals, not guarantees
+            of future performance.
+        </li>
+
+        <li>
+            Every recommended action should be reviewed by a human before
+            implementation.
+        </li>
+    </ul>
+
+
+    <h2>7. Reproducibility</h2>
+
+    <p>
+        The analysis notebooks and supporting work are maintained in the
+        project repository.
+    </p>
+
+    <ul>
+        <li>
+            ML-08 — Capstone Modeling Lane
+        </li>
+
+        <li>
+            ML-09 — Validation and Research Claim Audit
+        </li>
+
+        <li>
+            ML-10 — Content Action Playbook
+        </li>
+    </ul>
+
+    <p>
+        The notebooks contain the code used for model training, validation,
+        error analysis, segmentation, and action prioritization.
+    </p>
+
+
+    <h2>8. Monitoring and Future Review</h2>
+
+    <p>
+        The action playbook should be monitored across reporting periods using
+        the same segment definitions and metrics.
+    </p>
+
+    <ul>
+        <li>Number of pages in each priority segment</li>
+        <li>Clicks in the last 30 days versus the previous 30 days</li>
+        <li>Impressions and CTR</li>
+        <li>Average position</li>
+        <li>Trend direction and trend percentage</li>
+        <li>Changes in segment distribution</li>
+    </ul>
+
+    <p>
+        A review should be triggered if segment sizes change substantially,
+        trends change materially, important input fields become inconsistent,
+        the schema changes, or the relationship between signals and action
+        priorities changes.
+    </p>
+
+
+    <h2>9. Acknowledgments and Data Credit</h2>
+
+    <p>
+        This project was completed as part of the FlyRank ML Internship using
+        the FlyRank starter dataset. The dataset is anonymized and is used here
+        for analysis and decision-support work.
+    </p>
+
+    <p>
+        Data credit: FlyRank —
+        <a href="https://flyrank.ai/" target="_blank">
+            https://flyrank.ai/
+        </a>
+    </p>
+
+
+    <footer>
+        <p>
+            FlyRank ML Internship — ML-11 Research Paper
+        </p>
+
+        <p>
+            This paper presents observed and measured results from the
+            internship dataset and should not be interpreted as evidence of
+            causal effects or production-ready predictive performance.
+        </p>
+    </footer>
+
+</article>
+
+</body>
+</html>
